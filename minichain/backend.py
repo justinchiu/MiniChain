@@ -9,15 +9,8 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence
 from eliot import start_action, to_file
 from eliottree import render_tasks, tasks_from_iterable
 
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_random_exponential,
-)  # for exponential backoff
-
 if TYPE_CHECKING:
     import manifest
-
 
 
 @dataclass
@@ -129,13 +122,6 @@ class BashProcess(Backend):
             output = output.strip()
         return output
 
-@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-def completion_with_backoff(**kwargs):
-        return openai.Completion.create(**kwargs)
-
-@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
-def chat_completion_with_backoff(**kwargs):
-        return openai.ChatCompletion.create(**kwargs)
 
 class OpenAIBase(Backend):
     def __init__(self, model: str = "text-davinci-003", max_tokens: int = 256) -> None:
@@ -154,9 +140,20 @@ class OpenAIBase(Backend):
         )
 
 
+
+
+
 class OpenAI(OpenAIBase):
     def run(self, request: Request) -> str:
         import openai
+        from tenacity import (
+            retry,
+            stop_after_attempt,
+            wait_random_exponential,
+        )  # for exponential backoff
+        @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+        def completion_with_backoff(**kwargs):
+            return openai.Completion.create(**kwargs)
 
         #ans = openai.Completion.create(
         ans = completion_with_backoff(
@@ -183,6 +180,15 @@ class OpenAI(OpenAIBase):
 class OpenAIChat(OpenAI):
     def run(self, request: Request) -> str:
         import openai
+        from tenacity import (
+            retry,
+            stop_after_attempt,
+            wait_random_exponential,
+        )  # for exponential backoff
+
+        @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+        def chat_completion_with_backoff(**kwargs):
+            return openai.ChatCompletion.create(**kwargs)
 
         #ans = openai.ChatCompletion.create(
         ans = chat_completion_with_backoff(
