@@ -140,9 +140,6 @@ class OpenAIBase(Backend):
         )
 
 
-
-
-
 class OpenAI(OpenAIBase):
     def run(self, request: Request) -> str:
         import openai
@@ -222,8 +219,18 @@ class OpenAIEmbed(OpenAIBase):
 
     def run(self, request: Request) -> str:
         import openai
+        from tenacity import (
+            retry,
+            stop_after_attempt,
+            wait_random_exponential,
+        )  # for exponential backoff
 
-        ans = openai.Embedding.create(
+        @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+        def embedding_with_backoff(**kwargs):
+            return openai.Embedding.create(**kwargs)
+
+        #ans = openai.Embedding.create(
+        ans = embedding_with_backoff(
             engine=self.model,
             input=request.prompt,
         )
