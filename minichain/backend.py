@@ -9,8 +9,15 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence
 from eliot import start_action, to_file
 from eliottree import render_tasks, tasks_from_iterable
 
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_random_exponential,
+)  # for exponential backoff
+
 if TYPE_CHECKING:
     import manifest
+
 
 
 @dataclass
@@ -122,6 +129,13 @@ class BashProcess(Backend):
             output = output.strip()
         return output
 
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+def completion_with_backoff(**kwargs):
+        return openai.Completion.create(**kwargs)
+
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+def chat_completion_with_backoff(**kwargs):
+        return openai.ChatCompletion.create(**kwargs)
 
 class OpenAIBase(Backend):
     def __init__(self, model: str = "text-davinci-003", max_tokens: int = 256) -> None:
@@ -144,7 +158,8 @@ class OpenAI(OpenAIBase):
     def run(self, request: Request) -> str:
         import openai
 
-        ans = openai.Completion.create(
+        #ans = openai.Completion.create(
+        ans = completion_with_backoff(
             **self.options,
             stop=request.stop,
             prompt=request.prompt,
@@ -159,6 +174,35 @@ class OpenAI(OpenAIBase):
             debug_enabled=False,
         )
         ans = await async_openai.OpenAI.Completions.async_create(
+            **self.options,
+            stop=request.stop,
+            prompt=request.prompt,
+        )
+        return str(ans.choices[0].text)
+
+class OpenAIChat(OpenAI):
+    def run(self, request: Request) -> str:
+        import openai
+
+        #ans = openai.ChatCompletion.create(
+        ans = chat_completion_with_backoff(
+            **self.options,
+            stop=request.stop,
+            messages=[
+                {"role": "user", "content": request.prompt},
+            ],
+        )
+        return str(ans["choices"][0]["message"]["content"])
+
+    async def arun(self, request: Request) -> str:
+        raise NotImplementedError
+        import async_openai
+
+        async_openai.OpenAI.configure(
+            api_key=self.api_key,
+            debug_enabled=False,
+        )
+        ans = await async_openai.OpenAI.ChatCompletions.async_create(
             **self.options,
             stop=request.stop,
             prompt=request.prompt,
@@ -254,6 +298,7 @@ class MiniChain:
     Google = Google
 
     OpenAI = OpenAI
+    OpenAIChat = OpenAIChat
     OpenAIEmbed = OpenAIEmbed
     HuggingFace = HuggingFace
     HuggingFaceEmbed = HuggingFaceEmbed
