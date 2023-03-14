@@ -124,8 +124,12 @@ class BashProcess(Backend):
 
 
 class OpenAIBase(Backend):
-    def __init__(self, model: str = "text-davinci-003", max_tokens: int = 256) -> None:
-
+    def __init__(
+        self,
+        model: str = "text-davinci-003",
+        max_tokens: int = 256,
+        stop_tokens: Optional[List[str]] = None,
+    ) -> None:
         import openai
 
         self.api_key = os.environ.get("OPENAI_KEY")
@@ -137,6 +141,7 @@ class OpenAIBase(Backend):
             model=model,
             max_tokens=max_tokens,
             temperature=0,
+            stop=stop_tokens,
         )
 
 
@@ -148,11 +153,12 @@ class OpenAI(OpenAIBase):
             stop_after_attempt,
             wait_random_exponential,
         )  # for exponential backoff
+
         @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
         def completion_with_backoff(**kwargs):
             return openai.Completion.create(**kwargs)
 
-        #ans = openai.Completion.create(
+        # ans = openai.Completion.create(
         ans = completion_with_backoff(
             **self.options,
             stop=request.stop,
@@ -174,6 +180,7 @@ class OpenAI(OpenAIBase):
         )
         return str(ans.choices[0].text)
 
+
 class OpenAIChat(OpenAI):
     def run(self, request: Request) -> str:
         import openai
@@ -187,7 +194,7 @@ class OpenAIChat(OpenAI):
         def chat_completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
-        #ans = openai.ChatCompletion.create(
+        # ans = openai.ChatCompletion.create(
         ans = chat_completion_with_backoff(
             **self.options,
             stop=request.stop,
@@ -229,7 +236,7 @@ class OpenAIEmbed(OpenAIBase):
         def embedding_with_backoff(**kwargs):
             return openai.Embedding.create(**kwargs)
 
-        #ans = openai.Embedding.create(
+        # ans = openai.Embedding.create(
         ans = embedding_with_backoff(
             engine=self.model,
             input=request.prompt,
@@ -246,7 +253,6 @@ class HuggingFaceBase(Backend):
 
 class HuggingFace(HuggingFaceBase):
     def run(self, request: Request) -> str:
-
         from huggingface_hub.inference_api import InferenceApi
 
         self.client = InferenceApi(
@@ -258,7 +264,6 @@ class HuggingFace(HuggingFaceBase):
 
 class HuggingFaceEmbed(HuggingFaceBase):
     def run(self, request: Request) -> str:
-
         from huggingface_hub.inference_api import InferenceApi
 
         self.client = InferenceApi(

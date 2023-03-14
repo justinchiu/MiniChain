@@ -4,10 +4,13 @@ import minichain
 
 # PAL Prompt
 
+
 class PalPrompt(minichain.TemplatePrompt):
     template_file = "pal.pmpt.tpl"
 
+
 # Prompt to run and print python code.
+
 
 class PyPrompt(minichain.Prompt):
     def prompt(self, inp):
@@ -15,6 +18,7 @@ class PyPrompt(minichain.Prompt):
 
     def parse(self, response, inp):
         return int(response)
+
 
 # Chain the prompts.
 

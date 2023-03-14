@@ -9,13 +9,16 @@ import minichain
 
 # Define the state of the bot.
 
+
 @dataclass
 class IntermediateState:
     s: str
 
+
 @dataclass
 class FinalState:
     s: str
+
 
 @dataclass
 class Out:
@@ -24,6 +27,7 @@ class Out:
 
 
 # Self Ask Prompt
+
 
 class SelfAsk(minichain.TemplatePrompt[Out]):
     template_file = "selfask.pmpt.tpl"
@@ -41,7 +45,9 @@ class SelfAsk(minichain.TemplatePrompt[Out]):
             self.Parser.response.parse(response).or_die(),
         )
 
+
 # Runtime loop
+
 
 def selfask(inp: str, openai, google) -> str:
     prompt1 = SelfAsk(openai)
