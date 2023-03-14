@@ -128,7 +128,6 @@ class OpenAIBase(Backend):
         self,
         model: str = "text-davinci-003",
         max_tokens: int = 256,
-        stop_tokens: Optional[List[str]] = None,
     ) -> None:
         import openai
 
@@ -141,7 +140,6 @@ class OpenAIBase(Backend):
             model=model,
             max_tokens=max_tokens,
             temperature=0,
-            stop=stop_tokens,
         )
 
 
