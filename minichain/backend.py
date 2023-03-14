@@ -89,9 +89,13 @@ class Python(Backend):
         from contextlib import redirect_stdout
         from io import StringIO
 
+        with Path("temporary_code.py").open("w") as f:
+            f.write(request.prompt)
+
         f = StringIO()
         with redirect_stdout(f):
-            exec(request.prompt)
+            import temporary_code
+            #exec(request.prompt)
         s = f.getvalue()
         return s
 
