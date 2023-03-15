@@ -5,6 +5,7 @@ import sys
 from dataclasses import dataclass
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, Sequence
+from pathlib import Path
 
 from eliot import start_action, to_file
 from eliottree import render_tasks, tasks_from_iterable
@@ -92,9 +93,12 @@ class Python(Backend):
         with Path("temporary_code.py").open("w") as f:
             f.write(request.prompt)
 
+        ## for debugging
+        #import temporary_code
+
         f = StringIO()
         with redirect_stdout(f):
-            import temporary_code
+            exec(Path("temporary_code.py").read_text(), globals())
             #exec(request.prompt)
         s = f.getvalue()
         return s
