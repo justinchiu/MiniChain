@@ -46,6 +46,7 @@ class TemplatePrompt(Prompt[Mapping[str, Any], Output]):
     template_file = ""
     prompt_template = ""
     stop_template = ""
+    stop_templates = None
 
     def render_prompt_html(self, inp: Mapping[str, Any], prompt: str) -> HTML:
         n = {}
@@ -76,7 +77,9 @@ class TemplatePrompt(Prompt[Mapping[str, Any], Output]):
         else:
             x = tmp.render(**asdict(kwargs))
 
-        if self.stop_template:
+        if self.stop_templates:
+            stop = self.stop_templates
+        elif self.stop_template:
             stop = [Template(self.stop_template).render(**kwargs)]
         else:
             stop = None
