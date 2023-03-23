@@ -157,10 +157,10 @@ class OpenAI(OpenAIBase):
         from tenacity import (
             retry,
             stop_after_attempt,
-            wait_random_exponential,
-        )  # for exponential backoff
+            wait_fixed,
+        )
 
-        @retry(wait=wait_random_exponential(min=1, max=4), stop=stop_after_attempt(10))
+        @retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
         def completion_with_backoff(**kwargs):
             return openai.Completion.create(**kwargs)
 
@@ -193,10 +193,10 @@ class OpenAIChat(OpenAI):
         from tenacity import (
             retry,
             stop_after_attempt,
-            wait_random_exponential,
+            wait_fixed,
         )  # for exponential backoff
 
-        @retry(wait=wait_random_exponential(min=1, max=4), stop=stop_after_attempt(10))
+        @retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
         def chat_completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
@@ -235,10 +235,10 @@ class OpenAIEmbed(OpenAIBase):
         from tenacity import (
             retry,
             stop_after_attempt,
-            wait_random_exponential,
-        )  # for exponential backoff
+            wait_fixed,
+        )
 
-        @retry(wait=wait_random_exponential(min=1, max=4), stop=stop_after_attempt(10))
+        @retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
         def embedding_with_backoff(**kwargs):
             return openai.Embedding.create(**kwargs)
 
