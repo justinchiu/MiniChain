@@ -160,7 +160,7 @@ class OpenAI(OpenAIBase):
             wait_random_exponential,
         )  # for exponential backoff
 
-        @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+        @retry(wait=wait_random_exponential(min=1, max=4), stop=stop_after_attempt(10))
         def completion_with_backoff(**kwargs):
             return openai.Completion.create(**kwargs)
 
@@ -196,7 +196,7 @@ class OpenAIChat(OpenAI):
             wait_random_exponential,
         )  # for exponential backoff
 
-        @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+        @retry(wait=wait_random_exponential(min=1, max=4), stop=stop_after_attempt(10))
         def chat_completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
@@ -238,7 +238,7 @@ class OpenAIEmbed(OpenAIBase):
             wait_random_exponential,
         )  # for exponential backoff
 
-        @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
+        @retry(wait=wait_random_exponential(min=1, max=4), stop=stop_after_attempt(10))
         def embedding_with_backoff(**kwargs):
             return openai.Embedding.create(**kwargs)
 
