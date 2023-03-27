@@ -203,15 +203,19 @@ class OpenAIChat(OpenAI):
         def chat_completion_with_backoff(**kwargs):
             return openai.ChatCompletion.create(**kwargs)
 
-        # ans = openai.ChatCompletion.create(
-        ans = chat_completion_with_backoff(
-            **self.options,
-            stop=request.stop,
-            messages=[
-                {"role": "user", "content": request.prompt},
-            ],
-        )
-        return str(ans["choices"][0]["message"]["content"])
+        try:
+            # ans = openai.ChatCompletion.create(
+            ans = chat_completion_with_backoff(
+                **self.options,
+                stop=request.stop,
+                messages=[
+                    {"role": "user", "content": request.prompt},
+                ],
+            )
+            return str(ans["choices"][0]["message"]["content"])
+       except:
+           # return empty string on failure
+           return ""
 
     async def arun(self, request: Request) -> str:
         raise NotImplementedError
