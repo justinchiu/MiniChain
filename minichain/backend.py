@@ -214,8 +214,8 @@ class OpenAIChat(OpenAI):
             )
             return str(ans["choices"][0]["message"]["content"])
        except:
-           # return empty string on failure
-           return ""
+            # return empty string on failure
+            return ""
 
     async def arun(self, request: Request) -> str:
         raise NotImplementedError
