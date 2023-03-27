@@ -96,11 +96,14 @@ class Python(Backend):
         ## for debugging
         #import temporary_code
 
-        f = StringIO()
-        with redirect_stdout(f):
-            exec(Path("temporary_code.py").read_text(), globals())
-            #exec(request.prompt)
-        s = f.getvalue()
+        try:
+            f = StringIO()
+            with redirect_stdout(f):
+                exec(Path("temporary_code.py").read_text(), globals())
+                #exec(request.prompt)
+            s = f.getvalue()
+        except:
+            s = "None"
         return s
 
 
