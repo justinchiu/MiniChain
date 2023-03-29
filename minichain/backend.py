@@ -213,7 +213,7 @@ class OpenAIChat(OpenAI):
                 ],
             )
             return str(ans["choices"][0]["message"]["content"])
-       except:
+        except:
             # return empty string on failure
             return ""
 
