@@ -215,6 +215,8 @@ class OpenAIChat(OpenAI):
                 ],
             )
             return str(ans["choices"][0]["message"]["content"])
+        except KeyboardInterrupt:
+            sys.exit(130)
         except:
             # return empty string on failure
             return ""
