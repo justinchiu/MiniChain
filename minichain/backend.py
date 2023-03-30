@@ -102,6 +102,8 @@ class Python(Backend):
                 exec(Path("temporary_code.py").read_text(), globals())
                 #exec(request.prompt)
             s = f.getvalue()
+        except KeyboardInterrupt:
+            sys.exit(130)
         except:
             s = "None"
         return s
