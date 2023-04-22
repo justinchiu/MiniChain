@@ -65,7 +65,7 @@ class TemplatePrompt(Prompt[Mapping[str, Any], Output]):
 
     def prompt(self, kwargs: Mapping[str, Any]) -> Request:
         if self.template_file:
-            tmp = Environment(loader=FileSystemLoader([".", ""])).get_template(
+            tmp = Environment(loader=FileSystemLoader([".", "/"])).get_template(
                 name=self.template_file
             )
         elif self.template:
