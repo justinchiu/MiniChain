@@ -261,6 +261,43 @@ class OpenAIEmbed(OpenAIBase):
         return ans["data"][0]["embedding"]  # type: ignore
 
 
+class Palm(Backend):
+    def __init__(
+        self,
+        model: str = "models/text-bison-001",
+        max_tokens: int = 1024,
+    ) -> None:
+        import google.generativeai as palm
+        palm.configure(api_key=os.getenv("GOOGLE_KEY"))
+
+        self.model = model
+        self.options = dict(
+            model=model,
+            max_tokens=max_tokens,
+            temperature=0,
+        )
+
+    def run(self, request: Request) -> str:
+        import google.generativeai as palm
+        from tenacity import (
+            retry,
+            stop_after_attempt,
+            wait_fixed,
+        )
+
+        @retry(wait=wait_fixed(1), stop=stop_after_attempt(10))
+        def completion_with_backoff(**kwargs):
+            return palm.generate_text(**kwargs)
+
+        # ans = openai.Completion.create(
+        ans = completion_with_backoff(
+            **self.options,
+            stop_sequences=request.stop,
+            prompt=request.prompt,
+        )
+        return str(ans.candidates[0]["output"])
+
+
 class HuggingFaceBase(Backend):
     def __init__(self, model: str = "gpt2") -> None:
         self.model = model
