@@ -270,10 +270,12 @@ class Palm(Backend):
         import google.generativeai as palm
         palm.configure(api_key=os.getenv("GOOGLE_KEY"))
 
-        self.model = model
+        # ignore model argument XD
+        self.model = "models/text-bison-001"
+        max_tokens = 2048
         self.options = dict(
-            model=model,
-            max_tokens=max_tokens,
+            model=self.model,
+            max_output_tokens=max_tokens,
             temperature=0,
         )
 
@@ -372,6 +374,7 @@ class MiniChain:
     OpenAI = OpenAI
     OpenAIChat = OpenAIChat
     OpenAIEmbed = OpenAIEmbed
+    Palm = Palm
     HuggingFace = HuggingFace
     HuggingFaceEmbed = HuggingFaceEmbed
     BashProcess = BashProcess
